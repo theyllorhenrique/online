@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+  <body>
+    <canvas id="game" width="800" height="600"></canvas>
+    <script>
+      const canvas = document.getElementById("game");
+      const ctx = canvas.getContext("2d");
+
+      const socket = new WebSocket(`wss://${window.location.host}`);
+
+      let id = null;
+      let players = {};
+
+      socket.onmessage = (event) => {
+        const data = JSON.parse(event.data);
+        if (data.type === "init") {
+          id = data.id;
+          players = data.players;
+        } else if (data.type === "update") {
+          players = data.players;
+        }
+      };
+
+      document.addEventListener("keydown", (e) => {
+        if (!players[id]) return;
+        const p = players[id];
+        if (e.key === "w") p.y -= 5;
+        if (e.key === "s") p.y += 5;
+        if (e.key === "a") p.x -= 5;
+        if (e.key === "d") p.x += 5;
+
+        socket.send(JSON.stringify({ type: "move", position: p }));
+      });
+
+      function draw() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        for (let pid in players) {
+          const p = players[pid];
+          ctx.fillStyle = pid === id ? "blue" : "red";
+          ctx.fillRect(p.x, p.y, 20, 20);
+        }
+        requestAnimationFrame(draw);
+      }
+
+      draw();
+    </script>
+  </body>
+</html>

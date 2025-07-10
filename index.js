@@ -1,11 +1,10 @@
-const express = require('express');
+const express = require("express");
+const http = require("http");
+const WebSocket = require("ws");
+
 const app = express();
-const port = 3000;
+const server = http.createServer(app);
+const wss = new WebSocket.Server({ server });
 
-app.get('/', (req, res) => {
-  res.send('Projeto online funcionando!');
-});
-
-app.listen(port, () => {
-  console.log(`Servidor rodando em http://localhost:${port}`);
-});
+// ISSO AQUI é o que serve o HTML
+app.use(express.static("public"));
